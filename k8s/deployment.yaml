@@ -1,0 +1,44 @@
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: ecom-microservices-deployment
+  labels:
+    app: ecom-microservices
+spec:
+  replicas: 3  # Number of pod replicas for high availability
+  selector:
+    matchLabels:
+      app: ecom-microservices
+  template:
+    metadata:
+      labels:
+        app: ecom-microservices
+    spec:
+      containers:
+        - name: ecom-microservices
+          image: your-dockerhub-username/ecom-microservices:latest  # Replace with your Docker image name
+          ports:
+            - containerPort: 8080
+          env:
+            - name: SPRING_PROFILES_ACTIVE
+              value: "prod"  # Set the profile for the application
+            - name: DB_URL
+              value: "jdbc:mysql://mysql-service:3306/ecommerce_db"  # MySQL service URL
+            - name: DB_USERNAME
+              valueFrom:
+                secretKeyRef:
+                  name: db-credentials
+                  key: username  # Reference secret key for DB user
+            - name: DB_PASSWORD
+              valueFrom:
+                secretKeyRef:
+                  name: db-credentials
+                  key: password  # Reference secret key for DB password
+          resources:
+            limits:
+              memory: "512Mi"
+              cpu: "1"
+            requests:
+              memory: "256Mi"
+              cpu: "0.5"
+
